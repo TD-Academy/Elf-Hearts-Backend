@@ -26,6 +26,7 @@
     "@nestjs/passport": "^9.0.0",
     "@nestjs/platform-express": "^9.0.0",
     "@nestjs/sequelize": "^9.0.0",
+    "jsonwebtoken": "^8.5.1",
     "mysql2": "^2.3.3",
     "nestjs": "^0.0.1",
     "passport": "^0.6.0",

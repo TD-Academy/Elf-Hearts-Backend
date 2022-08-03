@@ -4,6 +4,7 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { User } from './models/user.model';
+import { Verification } from './models/verification.model';
 import { UserController } from './user/user.controller';
 import { UserService } from './user/user.service';
 
@@ -15,10 +16,10 @@ import { UserService } from './user/user.service';
       port: 3306,
       username: 'rtd',
       password: 'Tiny722$',
-      database: 'elf_hearts',
-      models: [User],
+      database: 'Nozu',
+      models: [User, Verification],
     }),
-    SequelizeModule.forFeature([User]),
+    SequelizeModule.forFeature([User, Verification]),
   ],
   controllers: [AppController, UserController],
   providers: [AppService, UserService],

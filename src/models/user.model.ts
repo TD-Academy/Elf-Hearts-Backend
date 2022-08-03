@@ -4,7 +4,7 @@ import { UUIDV4 } from 'sequelize';
 @Table
 export class User extends Model {
   @Column({ primaryKey: true, defaultValue: UUIDV4() })
-  userId: string;
+  id: string;
 
   @Column
   username: string;
