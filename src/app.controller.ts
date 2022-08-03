@@ -3,5 +3,5 @@ import { UserController } from './user/user.controller';
 import { UserService } from './user/user.service';
 @Controller()
 export class AppController {
-  constructor(private readonly userController: UserController) {}
+  constructor(private readonly userService: UserService) {}
 }

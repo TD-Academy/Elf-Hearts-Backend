@@ -1,23 +1,6 @@
 import { UserService } from './user.service';
-import {
-  Controller,
-  Get,
-  Query,
-  Post,
-  Body,
-  Put,
-  Param,
-  Delete,
-} from '@nestjs/common';
+import { Controller, Post, Body } from '@nestjs/common';
 import { CreateUserDto } from 'src/dto/create-user.dto';
-
-// type userBody={ userId: string;
-// username : string;
-// pass: any;
-// firstname: string;
-// lastname : string;
-// email : string;
-// phone : number;}
 
 @Controller()
 export class UserController {
@@ -25,6 +8,7 @@ export class UserController {
 
   @Post('signUp')
   signUp(@Body() createUserDto: CreateUserDto) {
+    console.log('dfgvdg');
     return this.UserService.signUp(createUserDto);
   }
 

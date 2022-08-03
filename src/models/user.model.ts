@@ -1,8 +1,9 @@
 import { Column, Table, Model } from 'sequelize-typescript';
+import { UUIDV4 } from 'sequelize';
 
 @Table
 export class User extends Model {
-  @Column
+  @Column({ primaryKey: true, defaultValue: UUIDV4() })
   userId: string;
 
   @Column
