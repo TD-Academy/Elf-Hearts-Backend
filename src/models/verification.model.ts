@@ -18,7 +18,8 @@ export class Verification extends Model {
   userId: string;
 
   @Column
-  verifyCode: string;
+  otp: string;
+  
   @Column
   sendDate: Date;
 

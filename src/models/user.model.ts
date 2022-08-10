@@ -7,20 +7,22 @@ export class User extends Model {
   id: string;
 
   @Column
-  username: string;
+  userName: string;
 
   @Column
-  pass: string;
+  password: string;
 
   @Column
-  firstname: string;
+  firstName: string;
 
   @Column
-  lastname: string;
+  lastName: string;
 
   @Column
   email: string;
 
   @Column
   phone: string;
+  @Column({defaultValue: "inactive"})
+  status: string;
 }

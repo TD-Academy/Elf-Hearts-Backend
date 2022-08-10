@@ -16,7 +16,7 @@ import { UserService } from './user/user.service';
       port: 3306,
       username: 'rtd',
       password: 'Tiny722$',
-      database: 'Nozu',
+      database: 'elf_hearts',
       models: [User, Verification],
     }),
     SequelizeModule.forFeature([User, Verification]),
