@@ -10,15 +10,20 @@ import {access } from 'fs';
 import axios from 'axios';
 import { LoginUserDto } from 'src/dto/login-user.dto';
 
+// username -> userName
+// phoneNumber -> phone
+// pass -> password
+
+
 export type UserFind={
-  username?: string;
+  userName?: string;
   phone?: string;
   email?: string;
   id?: string;
 }
 
 export type UserCheck={
-  username?: string;
+  userName?: string;
   phone?: string;
 }
 
@@ -33,7 +38,7 @@ export class UserService {
   async signIn(data: LoginUserDto) {
     const user = await this.userModel.findOne({
       where: {
-        username: data.username,
+        userName: data.userName,
         password: data.password,
       },
     });
@@ -64,12 +69,12 @@ export class UserService {
     };
   }
 
-  async findOne ({id, username, phone, email}:UserFind,
+  async findOne ({id, userName, phone, email}:UserFind,
     select?: keyof User| any){
-      if(!id && !username && !phone && !email) throw new HttpException('EMPTY_FIELD', 400);
+      if(!id && !userName && !phone && !email) throw new HttpException('EMPTY_FIELD', 400);
       let findOptions: any={};
       if (phone) findOptions.phone= phone;
-      if (username) findOptions.username= username;
+      if (userName) findOptions.userName= userName;
       if (email) findOptions.email= email;
       if (id) findOptions.id= id;
 
@@ -83,16 +88,9 @@ export class UserService {
     }
 
  async signUp(data: CreateUserDto) {
-    const newUser = new this.userModel({
-      userName: data.username,
-      password: data.pass,
-      firstName: data.firstname,
-      lastName: data.lastname,
-      phone: data.phone,
-      email: data.email,
-    });
+    const newUser = new this.userModel(data);
 
-    let checkedUser= await this.checkUser({username: data.username, phone: data.phone});
+    let checkedUser= await this.checkUser({userName: data.userName, phone: data.phone});
     if (checkedUser= true){
 
     newUser.save();
@@ -138,7 +136,7 @@ export class UserService {
   }
 
 
-async checkUser({username, phone }: UserCheck): Promise<any>{
+async checkUser({userName, phone }: UserCheck): Promise<any>{
   if(!!phone){
     const checkPhone= await this.userModel.findOne({where:{
       phone: phone
@@ -147,9 +145,9 @@ async checkUser({username, phone }: UserCheck): Promise<any>{
     throw new HttpException('PHONE_ALREADY_EXISTS', 400);
   }
 
-  if(!!username){
+  if(!!userName){
     const checkPhone= await this.userModel.findOne({where:
-      {username: username}});
+      {userName: userName}});
     if(!checkPhone) return true;
     throw new HttpException('PHONE_ALREADY_EXISTS', 400);
   }

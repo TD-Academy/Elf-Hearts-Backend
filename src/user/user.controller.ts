@@ -11,7 +11,6 @@ export class UserController {
 
   @Post('signUp')
   signUp(@Body() createUserDto: CreateUserDto) {
-    console.log('dfgvdg');
     return this.UserService.signUp(createUserDto);
   }
   @Post('signIn')
