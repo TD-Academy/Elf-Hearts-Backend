@@ -12,15 +12,20 @@ import * as bcrypt from 'bcrypt';
 import { hash } from 'bcrypt';
 import { LoginUserDto } from 'src/dto/login-user.dto';
 
+// username -> userName
+// phoneNumber -> phone
+// pass -> password
+
+
 export type UserFind={
-  username?: string;
+  userName?: string;
   phone?: string;
   email?: string;
   id?: string;
 }
 
 export type UserCheck={
-  username?: string;
+  userName?: string;
   phone?: string;
 }
 
@@ -33,19 +38,33 @@ export class UserService {
   ) {}
 
   async signIn(data: LoginUserDto) {
+    const user = await this.userModel.findOne({
+      where: {
+        userName: data.userName,
+        password: data.password,
+      },
+    });
 
-    const user = await this.userModel.findOne({where:{
-      userName: data.username}
-    })
+    // const user = await this.userModel.findOne({where:{
+    //   userName: data.username}
+    // })
     const isPasswordMatching = await bcrypt.compare(
       data.password, user.password)
 
     if (isPasswordMatching) {
       const { access_token, refresh_token } = this.TokenGenerate(user.id, );
       const{}=this.verifyModel.findOne({where:{isVerify:true}});
+
+      // made it so that when user logs in it returns the user id and userName too
+      // id and userName needed to store it in local storage
+
       return {
         access_token,
         refresh_token,
+        user: {
+          id: user.id,
+          userName: user.userName
+        }
       };}
     return 'User Not Found';
   }
@@ -66,19 +85,28 @@ export class UserService {
     };
   }
 
+  async findOne ({id, userName, phone, email}:UserFind,
+    select?: keyof User| any){
+      if(!id && !userName && !phone && !email) throw new HttpException('EMPTY_FIELD', 400);
+      let findOptions: any={};
+      if (phone) findOptions.phone= phone;
+      if (userName) findOptions.userName= userName;
+      if (email) findOptions.email= email;
+      if (id) findOptions.id= id;
+
+      const user= await this.userModel.findOne({
+        ...findOptions,
+        status:{
+          $in: status.split(' '),
+        }
+      })
+      return user;
+    }
+
  async signUp(data: CreateUserDto) {
-  const encrypted = await hash(data.password, 10);
+    const newUser = new this.userModel(data);
 
-    const newUser = new this.userModel({
-      userName: data.username,
-      password: encrypted,
-      firstName: data.firstname,
-      lastName: data.lastname,
-      phone: data.phone,
-      email: data.email,
-    });
-
-    let checkedUser= await this.checkUser({username: data.username, phone: data.phone});
+    let checkedUser= await this.checkUser({userName: data.userName, phone: data.phone});
     if (checkedUser= true){
 
     newUser.save();
@@ -124,7 +152,7 @@ export class UserService {
   }
 
 
-async checkUser({username, phone }: UserCheck): Promise<any>{
+async checkUser({userName, phone }: UserCheck): Promise<any>{
   if(!!phone){
     const checkPhone= await this.userModel.findOne({where:{
       phone: phone
@@ -132,9 +160,10 @@ async checkUser({username, phone }: UserCheck): Promise<any>{
     if(!checkPhone) return true;
     throw new HttpException('PHONE_ALREADY_EXISTS', 400);
   }
-  if(!!username){
+
+  if(!!userName){
     const checkPhone= await this.userModel.findOne({where:
-      {username: username}});
+      {userName: userName}});
     if(!checkPhone) return true;
     throw new HttpException('PHONE_ALREADY_EXISTS', 400);
   }
