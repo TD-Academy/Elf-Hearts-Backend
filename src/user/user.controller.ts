@@ -5,6 +5,7 @@ import { OtpUserDto } from 'src/dto/otp-user.dto';
 import { UserAuthGuard } from 'src/guards/user.guard';
 import { LoginUserDto } from 'src/dto/login-user.dto';
 import { changePasswordDto } from 'src/dto/changePass.dto';
+import { addTaskDto } from 'src/dto/addTask.dto';
 
 @Controller()
 export class UserController {
@@ -40,10 +41,12 @@ export class UserController {
     return this.UserService.requestPass(phone)
   }
 
+  @Post('addTask')
+  @UseGuards(UserAuthGuard)
+  addTask(@Body() body: addTaskDto, @Request() req){
+    return this.UserService.addTask(body, req.user.id)
+  }
 
-  // @Delete('delete')
-  // deleteUser(@Query() obj){
 
-  // return this.userService.remove(obj.id)
-  // }
+  
 }

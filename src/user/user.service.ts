@@ -11,11 +11,8 @@ import axios from 'axios';
 import * as bcrypt from 'bcrypt';
 import { hash } from 'bcrypt';
 import { LoginUserDto } from 'src/dto/login-user.dto';
-
-// username -> userName
-// phoneNumber -> phone
-// pass -> password
-
+import { addTaskDto } from 'src/dto/addTask.dto';
+import { Task } from 'src/models/task.model';
 
 export type UserFind={
   userName?: string;
@@ -35,36 +32,23 @@ export class UserService {
   constructor(
     @InjectModel(User) private userModel: typeof User,
     @InjectModel(Verification) private verifyModel: typeof Verification,
+    @InjectModel(Task) private taskModel: typeof Task,
   ) {}
 
   async signIn(data: LoginUserDto) {
-    const user = await this.userModel.findOne({
-      where: {
-        userName: data.userName,
-        password: data.password,
-      },
-    });
 
-    // const user = await this.userModel.findOne({where:{
-    //   userName: data.username}
-    // })
+    const user = await this.userModel.findOne({where:{
+      userName: data.userName}
+    })
     const isPasswordMatching = await bcrypt.compare(
       data.password, user.password)
 
     if (isPasswordMatching) {
       const { access_token, refresh_token } = this.TokenGenerate(user.id, );
       const{}=this.verifyModel.findOne({where:{isVerify:true}});
-
-      // made it so that when user logs in it returns the user id and userName too
-      // id and userName needed to store it in local storage
-
       return {
         access_token,
         refresh_token,
-        user: {
-          id: user.id,
-          userName: user.userName
-        }
       };}
     return 'User Not Found';
   }
@@ -85,44 +69,35 @@ export class UserService {
     };
   }
 
-  async findOne ({id, userName, phone, email}:UserFind,
-    select?: keyof User| any){
-      if(!id && !userName && !phone && !email) throw new HttpException('EMPTY_FIELD', 400);
-      let findOptions: any={};
-      if (phone) findOptions.phone= phone;
-      if (userName) findOptions.userName= userName;
-      if (email) findOptions.email= email;
-      if (id) findOptions.id= id;
-
-      const user= await this.userModel.findOne({
-        ...findOptions,
-        status:{
-          $in: status.split(' '),
-        }
-      })
-      return user;
+  async signUp(data: CreateUserDto) {
+    const encrypted = await hash(data.password, 10);
+  
+      const newUser = new this.userModel({
+        userName: data.userName,
+        password: encrypted,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        phone: data.phone,
+        email: data.email,
+      });
+  
+      let checkedUser= await this.checkUser({userName: data.userName, phone: data.phone});
+      if (checkedUser= true){
+  
+      newUser.save();
+      let code = Math.floor(100000 + Math.random() * 900000);
+      const newVerify = new this.verifyModel({
+        userId: newUser.id,
+        otp: code,
+        sendDate: new Date(),
+        usage: 'SignUp',
+        isVerify: false,
+      });
+      newVerify.save();
+      this.sendMessage(data.phone, code)
+      return newUser;
     }
-
- async signUp(data: CreateUserDto) {
-    const newUser = new this.userModel(data);
-
-    let checkedUser= await this.checkUser({userName: data.userName, phone: data.phone});
-    if (checkedUser= true){
-
-    newUser.save();
-    let code = Math.floor(100000 + Math.random() * 900000);
-    const newVerify = new this.verifyModel({
-      userId: newUser.id,
-      otp: code,
-      sendDate: new Date(),
-      usage: 'SignUp',
-      isVerify: false,
-    });
-    newVerify.save();
-    this.sendMessage(data.phone, code)
-    return newUser;
-  }
-  }
+    }
 
   sendMessage(phone, otp){
   axios({
@@ -188,12 +163,21 @@ console.log(userid)
   }
 }
 
-
 async requestPass(phone){
-  
 }
 
-
-
+async addTask(data: addTaskDto, userId){
+  const task= new this.taskModel({
+    userId: userId,
+    taskType: data.taskType,
+    task: data.task,
+    startDate: data.startDate,
+    endDate: data.endDate,
+    teamName: data.teamName,
+  })
+  console.log(task)
+  task.save();
+  return new HttpException('Task added successfully', 200)
+}
 
 }
