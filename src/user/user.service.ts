@@ -47,14 +47,15 @@ export class UserService {
       const { access_token, refresh_token } = this.TokenGenerate(user.id, );
       const{}=this.verifyModel.findOne({where:{isVerify:true}});
 
-      // made it so that when user logs in it returns the user id too
-      // id needed to store it in local storage
+      // made it so that when user logs in it returns the user id and userName too
+      // id and userName needed to store it in local storage
 
       return {
         access_token,
         refresh_token,
         user: {
-          id: user.id
+          id: user.id,
+          userName: user.userName
         }
       };}
     return 'User Not Found';
