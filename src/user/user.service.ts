@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { CreateUserDto } from 'src/dto/create-user.dto';
 import { OtpUserDto } from 'src/dto/otp-user.dto';
@@ -8,6 +8,8 @@ import { Verification } from 'src/models/verification.model';
 import { sign, verify } from 'jsonwebtoken';
 import {access } from 'fs';
 import axios from 'axios';
+import * as bcrypt from 'bcrypt';
+import { hash } from 'bcrypt';
 import { LoginUserDto } from 'src/dto/login-user.dto';
 
 export type UserFind={
@@ -31,14 +33,14 @@ export class UserService {
   ) {}
 
   async signIn(data: LoginUserDto) {
-    const user = await this.userModel.findOne({
-      where: {
-        username: data.username,
-        password: data.password,
-      },
-    });
 
-    if (user) {
+    const user = await this.userModel.findOne({where:{
+      userName: data.username}
+    })
+    const isPasswordMatching = await bcrypt.compare(
+      data.password, user.password)
+
+    if (isPasswordMatching) {
       const { access_token, refresh_token } = this.TokenGenerate(user.id, );
       const{}=this.verifyModel.findOne({where:{isVerify:true}});
       return {
@@ -55,7 +57,7 @@ export class UserService {
   TokenGenerate(id: string, expiresIn: string = '24h') {
     const access_token = sign({ userId: id }, 'secret', { expiresIn: '15m' });
     const refresh_token = sign({ userId: id }, 'secret' + '_refresh', {
-      expiresIn: expiresIn || '24h',
+    expiresIn: expiresIn || '24h',
     });
 
     return {
@@ -64,28 +66,12 @@ export class UserService {
     };
   }
 
-  async findOne ({id, username, phone, email}:UserFind,
-    select?: keyof User| any){
-      if(!id && !username && !phone && !email) throw new HttpException('EMPTY_FIELD', 400);
-      let findOptions: any={};
-      if (phone) findOptions.phone= phone;
-      if (username) findOptions.username= username;
-      if (email) findOptions.email= email;
-      if (id) findOptions.id= id;
-
-      const user= await this.userModel.findOne({
-        ...findOptions,
-        status:{
-          $in: status.split(' '),
-        }
-      })
-      return user;
-    }
-
  async signUp(data: CreateUserDto) {
+  const encrypted = await hash(data.password, 10);
+
     const newUser = new this.userModel({
       userName: data.username,
-      password: data.pass,
+      password: encrypted,
       firstName: data.firstname,
       lastName: data.lastname,
       phone: data.phone,
@@ -146,7 +132,6 @@ async checkUser({username, phone }: UserCheck): Promise<any>{
     if(!checkPhone) return true;
     throw new HttpException('PHONE_ALREADY_EXISTS', 400);
   }
-
   if(!!username){
     const checkPhone= await this.userModel.findOne({where:
       {username: username}});
@@ -155,6 +140,31 @@ async checkUser({username, phone }: UserCheck): Promise<any>{
   }
   return true;
 }
+
+async changePass(data, userid){
+console.log(userid)
+  const user= await this.userModel.findOne({where:{
+  id: userid}})
+  const passMatch = await bcrypt.compare(
+  data.oldPassword, user.password)
+
+  if(passMatch){
+    const encrypted = await hash(data.newPassword, 10);
+    this.userModel
+        .update({ password: encrypted}, { where: { id: userid} });
+    user.save();
+  }
+  else{
+    throw new HttpException('Wrong password', HttpStatus.BAD_REQUEST)
+  }
+}
+
+
+async requestPass(phone){
+  
+}
+
+
 
 
 }

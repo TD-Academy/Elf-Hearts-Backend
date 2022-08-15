@@ -21,9 +21,10 @@ export class UserAuthGuard {
       const decode = verify(token, 'secret') ;
       console.log(decode)
       if (!decode) throw 'Token undefiened';
+ 
 
-    //   const user = await this.userService.findOne({ id: decode.userId });
-    //   if (!user) throw 'User not found';
+      // const user = await this.userService.finOne({ id: decode.userId });
+      // if (!user) throw 'User not found';
 
       req.user = {
         id: decode.userId,
