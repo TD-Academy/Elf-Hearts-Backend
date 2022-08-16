@@ -230,7 +230,8 @@ async addTaskType(data: TaskTypeDto, userId){
   taskType: data.taskType,
   color: data.color,
   score: data.score,
-  teamName: data.teamName
+  CompanyId: data.companyId,
+  teamId: data.teamId
   })
   newTaskType.save()
   return newTaskType;

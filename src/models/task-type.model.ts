@@ -7,7 +7,7 @@ export class TaskType extends Model {
   @Column({ primaryKey: true, defaultValue: UUIDV4() })
   taskTypeId: string;
 
-  @ForeignKey(() => User)
+  @Column
   userId: string;
 
   @Column
@@ -20,5 +20,8 @@ export class TaskType extends Model {
   score: string;
 
   @Column
-  teamName: string;
+  CompanyId: string;
+
+  @Column
+  teamId: string;
 }
