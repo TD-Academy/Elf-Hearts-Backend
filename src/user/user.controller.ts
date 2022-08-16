@@ -5,9 +5,8 @@ import { OtpUserDto } from 'src/dto/otp-user.dto';
 import { UserAuthGuard } from 'src/guards/user.guard';
 import { LoginUserDto } from 'src/dto/login-user.dto';
 import { changePasswordDto } from 'src/dto/change-pass.dto';
-import { addTaskDto } from 'src/dto/add-task.dto';
 import { ForgotPasswordDto, RequestPasswordDto } from 'src/dto/forgot-password.dto';
-import { TaskTypeDto } from 'src/dto/task-type.dto';
+
 
 @Controller()
 export class UserController {
@@ -52,20 +51,4 @@ export class UserController {
   changedPass(@Body() body: ForgotPasswordDto){
     return this.UserService.changedPass(body)
   }
-
-  @Post('addTask')
-  @UseGuards(UserAuthGuard)
-  addTask(@Body() body: addTaskDto, @Request() req){
-    return this.UserService.addTask(body, req.user.id)
-  }
-
-  @Post('addTaskType')
-  @UseGuards(UserAuthGuard)
-  addTaskType(@Body() body: TaskTypeDto, @Request() req){
-    return this.UserService.addTaskType(body, req.user.id)
-  }
-
-
-
-  
 }

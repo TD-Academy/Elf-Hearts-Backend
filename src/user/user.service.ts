@@ -11,9 +11,7 @@ import axios from 'axios';
 import * as bcrypt from 'bcrypt';
 import { hash } from 'bcrypt';
 import { LoginUserDto } from 'src/dto/login-user.dto';
-import { addTaskDto } from 'src/dto/add-task.dto';
 import { Task } from 'src/models/task.model';
-import { TaskTypeDto } from 'src/dto/task-type.dto';
 import { TaskType } from 'src/models/task-type.model';
 
 export type UserFind={
@@ -208,33 +206,6 @@ const encrypted= await hash(data.newPassword, 10);
 this.userModel.update({ password: encrypted}, { where: { id: user.id} })
 user.save();
 return new HttpException('PASSWORD_CHANGED_SUCCESSFULLY', 200)
-}
-
-async addTask(data: addTaskDto, userId){
-  const task= new this.taskModel({
-    userId: userId,
-    taskType: data.taskType,
-    task: data.task,
-    startDate: data.startDate,
-    endDate: data.endDate,
-    teamName: data.teamName,
-  })
-  console.log(task)
-  task.save();
-  return new HttpException('Task added successfully', 200)
-}
-
-async addTaskType(data: TaskTypeDto, userId){
-  const newTaskType= new this.taskTypeModel({
-  userId: userId,
-  taskType: data.taskType,
-  color: data.color,
-  score: data.score,
-  CompanyId: data.companyId,
-  teamId: data.teamId
-  })
-  newTaskType.save()
-  return newTaskType;
 }
 
 }
