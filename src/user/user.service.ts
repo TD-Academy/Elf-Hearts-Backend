@@ -145,7 +145,7 @@ async checkUser({userName, phone }: UserCheck): Promise<any>{
   return true;
 }
 
-async changePass(data, userid){
+async passwordChange(data, userid){
 console.log(userid)
   const user= await this.userModel.findOne({where:{
   id: userid}})
@@ -163,7 +163,48 @@ console.log(userid)
   }
 }
 
-async requestPass(phone){
+async requestPass(data){
+  const user = await this.userModel.findOne({where:{
+  phone: data.phone
+}})
+  if(user){
+  let code = Math.floor(100000 + Math.random() * 900000);
+      const newVerify = new this.verifyModel({
+        userId: user.id,
+        otp: code,
+        sendDate: new Date(),
+        usage: 'ForgotPass',
+        isVerify: false,
+      });
+      newVerify.save();
+      this.sendMessage(user.phone, code)
+      return user;
+    }
+    else return new HttpException('WRONG_PHONE', 404);
+  
+}
+
+async acceptPass(data){
+  let ver = await this.verifyModel.findOne({
+    where:{userId:data.id}, order:[["createdAt", "DESC"]]});
+
+  if (ver.otp == data.verifyCode) {
+    this.verifyModel.update({isVerify: true}, {where:{userId: data.id}})
+   return this.userModel.findOne({where:{id:ver.userId}})
+  } 
+  else {
+    return new HttpException('Wrong OTP code', HttpStatus.BAD_REQUEST);
+  }
+}
+
+async changedPass(data){
+let user= await this.userModel.findOne({where:{
+  id:data.id
+}})
+const encrypted= await hash(data.newPassword, 10);
+this.userModel.update({ password: encrypted}, { where: { id: user.id} })
+user.save();
+return new HttpException('PASSWORD_CHANGED_SUCCESSFULLY', 200)
 }
 
 async addTask(data: addTaskDto, userId){
