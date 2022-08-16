@@ -11,8 +11,10 @@ import axios from 'axios';
 import * as bcrypt from 'bcrypt';
 import { hash } from 'bcrypt';
 import { LoginUserDto } from 'src/dto/login-user.dto';
-import { addTaskDto } from 'src/dto/addTask.dto';
+import { addTaskDto } from 'src/dto/add-task.dto';
 import { Task } from 'src/models/task.model';
+import { TaskTypeDto } from 'src/dto/task-type.dto';
+import { TaskType } from 'src/models/task-type.model';
 
 export type UserFind={
   userName?: string;
@@ -33,6 +35,7 @@ export class UserService {
     @InjectModel(User) private userModel: typeof User,
     @InjectModel(Verification) private verifyModel: typeof Verification,
     @InjectModel(Task) private taskModel: typeof Task,
+    @InjectModel(TaskType) private taskTypeModel: typeof TaskType
   ) {}
 
   async signIn(data: LoginUserDto) {
@@ -219,6 +222,18 @@ async addTask(data: addTaskDto, userId){
   console.log(task)
   task.save();
   return new HttpException('Task added successfully', 200)
+}
+
+async addTaskType(data: TaskTypeDto, userId){
+  const newTaskType= new this.taskTypeModel({
+  userId: userId,
+  taskType: data.taskType,
+  color: data.color,
+  score: data.score,
+  teamName: data.teamName
+  })
+  newTaskType.save()
+  return newTaskType;
 }
 
 }
