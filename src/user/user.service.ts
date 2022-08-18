@@ -86,6 +86,7 @@ export class UserService {
       if (checkedUser= true){
   
       newUser.save();
+      console.log(newUser)
       let code = Math.floor(100000 + Math.random() * 900000);
       const newVerify = new this.verifyModel({
         userId: newUser.id,
@@ -141,7 +142,7 @@ async checkUser({userName, phone }: UserCheck): Promise<any>{
     const checkPhone= await this.userModel.findOne({where:
       {userName: userName}});
     if(!checkPhone) return true;
-    throw new HttpException('PHONE_ALREADY_EXISTS', 400);
+    throw new HttpException('USERNAME_ALREADY_EXISTS', 400);
   }
   return true;
 }

@@ -13,15 +13,4 @@ export class TaskType extends Model {
   @Column
   taskType: string;
 
-  @Column
-  color: string;
-
-  @Column
-  score: string;
-
-  @Column
-  CompanyId: string;
-
-  @Column
-  teamId: string;
 }

@@ -1,6 +1,5 @@
 import { Controller, Post, Body, Get, UseGuards,Request } from '@nestjs/common';
 import { addTaskDto } from 'src/dto/add-task.dto';
-import { TaskTypeDto } from 'src/dto/task-type.dto';
 import { UserAuthGuard } from 'src/guards/user.guard';
 import { TaskService } from './task.service';
 
@@ -16,7 +15,7 @@ export class TaskController {
 
   @Post('addTaskType')
   @UseGuards(UserAuthGuard)
-  addTaskType(@Body() body: TaskTypeDto, @Request() req){
+  addTaskType(@Body() body: string, @Request() req){
     return this.TaskService.addTaskType(body, req.user.id)
 
   }
