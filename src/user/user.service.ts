@@ -102,7 +102,7 @@ export class UserService {
       newVerify.save();
       this.sendMessage(data.phone, code)
       return {
-        userId: newUser.id,
+        id: newUser.id,
         otp: code
       };
     }
