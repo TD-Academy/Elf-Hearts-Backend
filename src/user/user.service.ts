@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { CreateUserDto } from 'src/dto/create-user.dto';
 import { OtpUserDto } from 'src/dto/otp-user.dto';
@@ -50,6 +50,10 @@ export class UserService {
       return {
         access_token,
         refresh_token,
+        user: {
+          id: user.id,
+          userName: user.userName
+        }
       };}
     throw new UnauthorizedException;
   }
@@ -66,7 +70,7 @@ export class UserService {
 
     return {
       access_token,
-      refresh_token,
+      refresh_token
     };
   }
 
@@ -124,7 +128,7 @@ export class UserService {
       ver.isVerify = true;
       ver.save();
     } else {
-      return 'Wrong OTP code';
+      return new NotFoundException;
     }
   }
 
