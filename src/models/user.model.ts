@@ -23,6 +23,7 @@ export class User extends Model {
 
   @Column
   phone: string;
+  
   @Column({defaultValue: "inactive"})
   status: string;
 }
