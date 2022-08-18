@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { CreateUserDto } from 'src/dto/create-user.dto';
 import { OtpUserDto } from 'src/dto/otp-user.dto';
@@ -36,7 +36,6 @@ export class UserService {
   ) {}
 
   async signIn(data: LoginUserDto) {
-
     const user = await this.userModel.findOne({where:{
       userName: data.userName}
     })
@@ -49,8 +48,12 @@ export class UserService {
       return {
         access_token,
         refresh_token,
+        'user': {
+          'userName': user.userName,
+          'id': user.id
+        }
       };}
-    return 'User Not Found';
+    throw new UnauthorizedException;
   }
 
   getUsers(): Promise<User[]> {
