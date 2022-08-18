@@ -45,7 +45,7 @@ export class UserService {
       data.password, user.password)
 
     if (isPasswordMatching) {
-      const { access_token, refresh_token } = this.TokenGenerate(user.id, );
+      const { access_token, refresh_token } = this.TokenGenerate(user.id);
       const{}=this.verifyModel.findOne({where:{isVerify:true}});
       return {
         access_token,
@@ -131,7 +131,12 @@ export class UserService {
         .update({ status: 'Active' }, { where: { id: ver.userId } })
       ver.isVerify = true;
       ver.save();
+      
+      const { access_token, refresh_token } = this.TokenGenerate(user.id);
+
       return {
+        access_token,
+        refresh_token,
         userId: user.id,
         userName: user.userName
       }
