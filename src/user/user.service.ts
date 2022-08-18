@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { CreateUserDto } from 'src/dto/create-user.dto';
 import { OtpUserDto } from 'src/dto/otp-user.dto';
@@ -51,7 +51,7 @@ export class UserService {
         access_token,
         refresh_token,
       };}
-    return 'User Not Found';
+    throw new UnauthorizedException;
   }
 
   getUsers(): Promise<User[]> {
