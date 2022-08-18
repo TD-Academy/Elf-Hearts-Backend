@@ -14,6 +14,7 @@ export class Verification extends Model {
   id: string;
   @BelongsTo(() => User)
   User: User;
+  
   @ForeignKey(() => User)
   userId: string;
 
@@ -25,6 +26,7 @@ export class Verification extends Model {
 
   @Column
   isVerify: Boolean;
+
   @Column
   usage: string;
 }

@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { CreateUserDto } from 'src/dto/create-user.dto';
 import { OtpUserDto } from 'src/dto/otp-user.dto';
@@ -11,8 +11,8 @@ import axios from 'axios';
 import * as bcrypt from 'bcrypt';
 import { hash } from 'bcrypt';
 import { LoginUserDto } from 'src/dto/login-user.dto';
-import { addTaskDto } from 'src/dto/addTask.dto';
 import { Task } from 'src/models/task.model';
+import { TaskType } from 'src/models/task-type.model';
 
 export type UserFind={
   userName?: string;
@@ -33,6 +33,7 @@ export class UserService {
     @InjectModel(User) private userModel: typeof User,
     @InjectModel(Verification) private verifyModel: typeof Verification,
     @InjectModel(Task) private taskModel: typeof Task,
+    @InjectModel(TaskType) private taskTypeModel: typeof TaskType
   ) {}
 
   async signIn(data: LoginUserDto) {
@@ -43,14 +44,14 @@ export class UserService {
       data.password, user.password)
 
     if (isPasswordMatching) {
-      const { access_token, refresh_token } = this.TokenGenerate(user.id, );
+      const { access_token, refresh_token } = this.TokenGenerate(user.id);
       const{}=this.verifyModel.findOne({where:{isVerify:true}});
       return {
         access_token,
         refresh_token,
-        'user': {
-          'userName': user.userName,
-          'id': user.id
+        user: {
+          id: user.id,
+          userName: user.userName
         }
       };}
     throw new UnauthorizedException;
@@ -68,7 +69,7 @@ export class UserService {
 
     return {
       access_token,
-      refresh_token,
+      refresh_token
     };
   }
 
@@ -88,6 +89,7 @@ export class UserService {
       if (checkedUser= true){
   
       newUser.save();
+      console.log(newUser)
       let code = Math.floor(100000 + Math.random() * 900000);
       const newVerify = new this.verifyModel({
         userId: newUser.id,
@@ -98,7 +100,10 @@ export class UserService {
       });
       newVerify.save();
       this.sendMessage(data.phone, code)
-      return newUser;
+      return {
+        id: newUser.id,
+        otp: code
+      };
     }
     }
 
@@ -120,12 +125,22 @@ export class UserService {
       where:{userId:data.id}, order:[["createdAt", "DESC"]]});
 
     if (ver.otp == data.verifyCode && !ver.isVerify) {
+      const user= await this.userModel.findOne({where:{id:ver.userId}})
       this.userModel
         .update({ status: 'Active' }, { where: { id: ver.userId } })
       ver.isVerify = true;
       ver.save();
+      
+      const { access_token, refresh_token } = this.TokenGenerate(user.id);
+
+      return {
+        access_token,
+        refresh_token,
+        id: user.id,
+        userName: user.userName
+      }
     } else {
-      return 'Wrong OTP code';
+      return new NotFoundException;
     }
   }
 
@@ -143,12 +158,12 @@ async checkUser({userName, phone }: UserCheck): Promise<any>{
     const checkPhone= await this.userModel.findOne({where:
       {userName: userName}});
     if(!checkPhone) return true;
-    throw new HttpException('PHONE_ALREADY_EXISTS', 400);
+    throw new HttpException('USERNAME_ALREADY_EXISTS', 400);
   }
   return true;
 }
 
-async changePass(data, userid){
+async passwordChange(data, userid){
 console.log(userid)
   const user= await this.userModel.findOne({where:{
   id: userid}})
@@ -166,21 +181,48 @@ console.log(userid)
   }
 }
 
-async requestPass(phone){
+async requestPass(data){
+  const user = await this.userModel.findOne({where:{
+  phone: data.phone
+}})
+  if(user){
+  let code = Math.floor(100000 + Math.random() * 900000);
+      const newVerify = new this.verifyModel({
+        userId: user.id,
+        otp: code,
+        sendDate: new Date(),
+        usage: 'ForgotPass',
+        isVerify: false,
+      });
+      newVerify.save();
+      this.sendMessage(user.phone, code)
+      return user;
+    }
+    else return new HttpException('WRONG_PHONE', 404);
+  
 }
 
-async addTask(data: addTaskDto, userId){
-  const task= new this.taskModel({
-    userId: userId,
-    taskType: data.taskType,
-    task: data.task,
-    startDate: data.startDate,
-    endDate: data.endDate,
-    teamName: data.teamName,
-  })
-  console.log(task)
-  task.save();
-  return new HttpException('Task added successfully', 200)
+async acceptPass(data){
+  let ver = await this.verifyModel.findOne({
+    where:{userId:data.id}, order:[["createdAt", "DESC"]]});
+
+  if (ver.otp == data.verifyCode) {
+    this.verifyModel.update({isVerify: true}, {where:{userId: data.id}})
+   return this.userModel.findOne({where:{id:ver.userId}})
+  } 
+  else {
+    return new HttpException('Wrong OTP code', HttpStatus.BAD_REQUEST);
+  }
+}
+
+async changedPass(data){
+let user= await this.userModel.findOne({where:{
+  id:data.id
+}})
+const encrypted= await hash(data.newPassword, 10);
+this.userModel.update({ password: encrypted}, { where: { id: user.id} })
+user.save();
+return new HttpException('PASSWORD_CHANGED_SUCCESSFULLY', 200)
 }
 
 }

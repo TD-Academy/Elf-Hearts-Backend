@@ -4,13 +4,13 @@ import { UUIDV4 } from 'sequelize';
 @Table
 export class Task extends Model {
   @Column
-  userId: string;
+  createdUserId: string;
 
   @Column({ primaryKey: true, defaultValue: UUIDV4() })
-  taskId: string;
+  id: string;
 
   @Column
-  taskType: string;
+  taskTypeId: string;
 
   @Column
   task: string;
@@ -22,5 +22,8 @@ export class Task extends Model {
   endDate: Date;
 
   @Column
-  teamName: string;
+  userId:string;
+
+  @Column
+  approveUserId: string
 }

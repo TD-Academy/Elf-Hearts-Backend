@@ -3,5 +3,6 @@ export class addTaskDto{
     task: string;
     startDate: Date;
     endDate: Date;
-    teamName: string;
+   userId: string;
+   approveUserId: string;
 }
