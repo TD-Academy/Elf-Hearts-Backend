@@ -137,7 +137,7 @@ export class UserService {
       return {
         access_token,
         refresh_token,
-        userId: user.id,
+        id: user.id,
         userName: user.userName
       }
     } else {
