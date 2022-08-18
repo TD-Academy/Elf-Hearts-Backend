@@ -126,10 +126,15 @@ export class UserService {
       where:{userId:data.id}, order:[["createdAt", "DESC"]]});
 
     if (ver.otp == data.verifyCode && !ver.isVerify) {
+      const user= await this.userModel.findOne({where:{id:ver.userId}})
       this.userModel
         .update({ status: 'Active' }, { where: { id: ver.userId } })
       ver.isVerify = true;
       ver.save();
+      return {
+        userId: user.id,
+        userName: user.userName
+      }
     } else {
       return new NotFoundException;
     }
