@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { CreateUserDto } from 'src/dto/create-user.dto';
 import { OtpUserDto } from 'src/dto/otp-user.dto';
@@ -58,7 +58,7 @@ export class UserService {
           userName: user.userName
         }
       };}
-    return 'User Not Found';
+    throw new UnauthorizedException;
   }
 
   getUsers(): Promise<User[]> {
