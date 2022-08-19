@@ -2,7 +2,7 @@ export class LoginUserDto {
 
   // username -> userName
 
-    userName: string;
+    email: string;
   
     password: string
   }
