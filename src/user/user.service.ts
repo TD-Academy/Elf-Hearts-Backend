@@ -49,10 +49,8 @@ export class UserService {
       return {
         access_token,
         refresh_token,
-        user: {
-          id: user.id,
-          userName: user.userName
-        }
+        id: user.id,
+        userName: user.userName
       };}
     throw new UnauthorizedException;
   }
