@@ -38,7 +38,7 @@ export class UserService {
 
   async signIn(data: LoginUserDto) {
     const user = await this.userModel.findOne({where:{
-      email: data.email}
+      phone: data.phone}
     })
     const isPasswordMatching = await bcrypt.compare(
       data.password, user.password)
